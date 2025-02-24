@@ -10,7 +10,7 @@ import (
 
 // -------------------STRUCT----------------------------\\
 type requestTask struct {
-	Task string `json"task"`
+	Task string `json:"task"`
 }
 
 // -------------------GLOBAL-VARABLE---------------------\\
