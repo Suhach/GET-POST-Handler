@@ -18,7 +18,7 @@ var task string
 
 // -------------------HANDLER-GET-------------------------\\
 func HelloHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Hello %s", task)
+	fmt.Fprintf(w, "Hello, %s", task)
 }
 
 // -------------------HANDLER-POST-------------------------\\
@@ -30,7 +30,7 @@ func SetTaskHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	task = req.Task
-	fmt.Fprintf(w, "Task updated to %s", task)
+	fmt.Fprintf(w, "Task updated to: %s", task)
 }
 
 // -------------------MAIN-FUNC----------------------------\\
