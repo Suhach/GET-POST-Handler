@@ -2,43 +2,50 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	"github.com/gorilla/mux"
 )
 
-// -------------------STRUCT----------------------------\\
-type requestTask struct {
-	Task string `json:"task"`
+// =----------GET--Handler---------------------------\\
+func GetTasks(w http.ResponseWriter, r *http.Request) {
+	var tasks Task
+	result := DB.Find(&tasks)
+	if result.Error != nil {
+		http.Error(w, "Ошибка при получении задач", http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(tasks)
+
 }
 
-// -------------------GLOBAL-VARABLE---------------------\\
-var task string
-
-// -------------------HANDLER-GET-------------------------\\
-func HelloHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Hello, %s", task)
-}
-
-// -------------------HANDLER-POST-------------------------\\
-func SetTaskHandler(w http.ResponseWriter, r *http.Request) {
-	var req requestTask
+// -------POST---Handler-----------------------------------\\
+func CreateTask(w http.ResponseWriter, r *http.Request) {
+	var req Task
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
 		http.Error(w, "Invalid JSON", http.StatusBadRequest)
 		return
 	}
-	task = req.Task
-	fmt.Fprintf(w, "Task updated to: %s", task)
+	DB.Create(&req)
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(req)
 }
 
-// -------------------MAIN-FUNC----------------------------\\
+// ---------main----func------------------------------------\\
 func main() {
-	router := mux.NewRouter()
 
-	router.HandleFunc("/api/hello", HelloHandler).Methods("GET")
-	router.HandleFunc("/api/task", SetTaskHandler).Methods("POST")
+	initDB()
+
+	DB.AutoMigrate(&Task{})
+
+	router := mux.NewRouter()
+	router.HandleFunc("/api/tasks", GetTasks).Methods("GET")
+	router.HandleFunc("/api/tasks", CreateTask).Methods("POST")
 
 	http.ListenAndServe(":8080", router)
+
 }
